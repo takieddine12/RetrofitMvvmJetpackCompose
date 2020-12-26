@@ -1,0 +1,2 @@
+rootProject.name = "JetpackComposeRetrofit"
+include ':app'
