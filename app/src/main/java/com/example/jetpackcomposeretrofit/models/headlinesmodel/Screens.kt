@@ -1,4 +1,4 @@
-package com.example.jetpackcomposeretrofit.models
+package com.example.jetpackcomposeretrofit.models.headlinesmodel
 
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Home

@@ -1,4 +1,4 @@
-package com.example.jetpackcomposeretrofit.models
+package com.example.jetpackcomposeretrofit.models.everythingmodel
 
 data class Article(
     val author: String,
