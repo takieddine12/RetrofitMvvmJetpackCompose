@@ -37,120 +37,119 @@ class MainActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
        setContent {
+           newsViewModel.getHeadlines("us","a9105f91876947b1b3b70761813fd4f9")
+           newsViewModel.getEverything("bitcoin","a9105f91876947b1b3b70761813fd4f9")
+
+           val headlinesList = newsViewModel.topHeadlinesState?.value
+           val everythingList = newsViewModel.everythingState?.value
+
            Column {
                 val navController = rememberNavController()
-            // TODO : FetchData
-            newsViewModel.getHeadlines("us","a9105f91876947b1b3b70761813fd4f9")
-                newsViewModel.getEverything("bitcoin","a9105f91876947b1b3b70761813fd4f9")
-                val headlinesList = newsViewModel.topHeadlinesState?.value
-                val everythingList = newsViewModel.everythingState?.value
-                Scaffold {
-                        // TODO  : AppBar
-                        TopAppBar(
-                            title = {Text(text = "News Application") },
-                            backgroundColor = Color.White,
-                            elevation =  12.dp,
-                            actions = {},
-                            navigationIcon = {}
-                        )
-
-                        // TODO : BottomBar and BottomNavigationView
-                        BottomAppBar {
-                            val screensList = listOf(Screens.headliensScreen, Screens.everythingScreen)
-
-                            BottomNavigation(
-                                backgroundColor = Color.Black
-                            ) {
-                                val navBackStackEntry by navController.currentBackStackEntryAsState()
-                                val currentRoute = navBackStackEntry?.arguments?.getString(KEY_ROUTE)
-
-                                screensList.forEach {
-                                    BottomNavigationItem(
-                                        icon = { Icon(it.icon) },
-                                        label = {Text(text = it.label) },
-                                        selected = currentRoute == it.route,
-                                        onClick = {
-                                            navController.popBackStack(navController.graph.startDestination, false)
-                                            if(currentRoute != it.route){
-                                                navController.navigate(it.route)
-                                            }
-                                        })
-                                }
-                            }
-
-                        }
-                        GetHeadlines(navController = navController, list = headlinesList!!,everythingList = everythingList!!)
-
-                    }
+                 SetUpUi(navController = navController, headlinesModel = headlinesList!! , everythingModel = everythingList!! )
                 }
             }
         }
     }
 
-    @Composable
-    private fun GetHeadlines(navController: NavHostController, list : TopHeadlinesModel,everythingList : EverythingModel){
-       NavHost(navController = navController,
-        startDestination = "headlines"){
-            composable("headlines"){
-                HeadlinesScreen(list)
+@Composable
+private fun SetUpUi(navController: NavHostController,headlinesModel: TopHeadlinesModel,everythingModel: EverythingModel){
+    Scaffold {
+        // TODO  : AppBar
+        TopAppBar(
+                title = {Text(text = "News Application") },
+                backgroundColor = Color.White,
+                elevation =  12.dp,
+                actions = {},
+                navigationIcon = {}
+        )
+
+        // TODO : BottomBar and BottomNavigationView
+        BottomAppBar {
+            val screensList = listOf(Screens.headliensScreen, Screens.everythingScreen)
+
+            BottomNavigation(backgroundColor = Color.Black) {
+                val navBackStackEntry by navController.currentBackStackEntryAsState()
+                val currentRoute = navBackStackEntry?.arguments?.getString(KEY_ROUTE)
+
+                screensList.forEach {
+                    BottomNavigationItem(
+                            icon = { Icon(it.icon) },
+                            label = {Text(text = it.label) },
+                            selected = currentRoute == it.route,
+                            onClick = {
+                                navController.popBackStack(navController.graph.startDestination, false)
+                                if(currentRoute != it.route){
+                                    navController.navigate(it.route)
+                                }
+                            })
+                }
             }
-            composable("everything"){
-                EverythingScreen(everythingList)
-            }
+
+        }
+      //  GetHeadlines(navController = navController, list = headlinesModel,everythingList = everythingModel)
+
+    }
+}
+
+@Composable
+private fun GetHeadlines(navController: NavHostController, list : TopHeadlinesModel,everythingList : EverythingModel){
+    NavHost(navController = navController,
+            startDestination = "headlines"){
+        composable("headlines"){
+           HeadlinesScreen(list)
+        }
+        composable("everything"){
+            EverythingScreen(everythingList)
         }
     }
+}
 
-    @Composable
-    private fun HeadlinesScreen(list : TopHeadlinesModel){
-        Column {
-            LazyColumn{
-                items(list.articles){
-                    Card(modifier = Modifier
-                        .fillMaxWidth()
-                        .height(250.dp)
-                            .clip(shape = RoundedCornerShape(14.dp))
-                            .padding(20.dp),
-                        elevation = 14.dp,
-                        backgroundColor = Color.White,
-                        content = {
-                            list.articles.forEach {
+@Composable
+private fun HeadlinesScreen(list : TopHeadlinesModel){
+    LazyColumn{
+        items(list.articles){
+            Card(modifier = Modifier
+                    .fillMaxWidth()
+                    .height(250.dp)
+                    .clip(shape = RoundedCornerShape(14.dp))
+                    .padding(20.dp),
+                    elevation = 14.dp,
+                    backgroundColor = Color.White,
+                    content = {
+                        list.articles.forEach {
                                 val image = Extras.loadPicture(imageUrl =  it.urlToImage, defaultImg = R.drawable.ic_launcher_background).value
                                 image?.let {
                                     Image(  modifier =  Modifier.fillMaxWidth().height(200.dp),
                                             bitmap = it.asImageBitmap()) }
 
-                                Spacer(modifier = Modifier.padding(top = 10.dp))
+                            Spacer(modifier = Modifier.padding(top = 10.dp))
 
-                                Text(text = "${it.title}")
+                            Text(text = "${it.title}")
 
-                                Spacer(modifier = Modifier.padding(top = 10.dp))
+                            Spacer(modifier = Modifier.padding(top = 10.dp))
 
-                                Text(text = "${it.publishedAt}")
-                            }
-                        })
+                            Text(text = "${it.publishedAt}")
+                        }
+                    })
 
-
-
-                }
-            }
         }
     }
+}
 
-    @Composable
-     private fun EverythingScreen(everythingList : EverythingModel){
-        Column {
-            LazyColumn{
-                items(everythingList.articles){
-                    Card(
-                            modifier = Modifier
-                                    .fillMaxWidth()
-                                    .height(250.dp)
-                                    .clip(shape = RoundedCornerShape(14.dp))
-                                    .padding(20.dp),
-                            elevation = 14.dp,
-                            backgroundColor = Color.White,
-                            content = {
-                                everythingList.articles.forEach {
+@Composable
+private fun EverythingScreen(everythingList : EverythingModel){
+    LazyColumn{
+        items(everythingList.articles){
+            Card(
+                    modifier = Modifier
+                            .fillMaxWidth()
+                            .height(250.dp)
+                            .clip(shape = RoundedCornerShape(14.dp))
+                            .padding(20.dp),
+                    elevation = 14.dp,
+                    backgroundColor = Color.White,
+                    content = {
+                        everythingList.articles.forEach {
                                     val image = Extras.loadPicture(imageUrl = it.urlToImage, defaultImg = R.drawable.ic_launcher_background).value
                                     image?.let {
                                         Image(  modifier =  Modifier
@@ -159,17 +158,16 @@ class MainActivity : AppCompatActivity() {
                                                 bitmap = it.asImageBitmap())
                                     }
 
-                                    Spacer(modifier = Modifier.padding(top = 10.dp))
+                            Spacer(modifier = Modifier.padding(top = 10.dp))
 
-                                    Text(text = "${it.title}")
+                            Text(text = "${it.title}")
 
-                                    Spacer(modifier = Modifier.padding(top = 10.dp))
+                            Spacer(modifier = Modifier.padding(top = 10.dp))
 
-                                    Text(text = "${it.publishedAt}")
-                                }
-                            })
-                }
-            }
+                            Text(text = "${it.publishedAt}")
+                        }
+                    })
         }
     }
+}
 
