@@ -33,20 +33,21 @@ import javax.inject.Inject
 @AndroidEntryPoint
 class MainActivity : AppCompatActivity() {
 
-     private val newsViewModel: NewsViewModel by viewModels()
+    private val newsViewModel: NewsViewModel by viewModels()
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContent {
-            Column {
+       setContent {
+           Column {
                 val navController = rememberNavController()
             // TODO : FetchData
             newsViewModel.getHeadlines("us","a9105f91876947b1b3b70761813fd4f9")
+                newsViewModel.getEverything("bitcoin","a9105f91876947b1b3b70761813fd4f9")
                 val headlinesList = newsViewModel.topHeadlinesState?.value
                 val everythingList = newsViewModel.everythingState?.value
                 Scaffold {
                         // TODO  : AppBar
                         TopAppBar(
-                            title = { androidx.compose.material.Text(text = "News Application") },
+                            title = {Text(text = "News Application") },
                             backgroundColor = Color.White,
                             elevation =  12.dp,
                             actions = {},
