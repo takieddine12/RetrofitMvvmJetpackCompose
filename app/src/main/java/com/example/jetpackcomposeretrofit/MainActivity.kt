@@ -2,6 +2,7 @@ package com.example.jetpackcomposeretrofit
 
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
+import android.util.Log
 import androidx.activity.viewModels
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.*
@@ -22,6 +23,7 @@ import androidx.navigation.NavHostController
 import androidx.navigation.compose.*
 import com.bumptech.glide.Glide
 import com.example.jetpackcomposeretrofit.models.everythingmodel.EverythingModel
+import com.example.jetpackcomposeretrofit.models.headlinesmodel.Article
 import com.example.jetpackcomposeretrofit.models.headlinesmodel.Screens
 import com.example.jetpackcomposeretrofit.models.headlinesmodel.TopHeadlinesModel
 import com.example.jetpackcomposeretrofit.mvvm.NewsViewModel
@@ -36,110 +38,108 @@ class MainActivity : AppCompatActivity() {
     private val newsViewModel: NewsViewModel by viewModels()
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-       setContent {
-           newsViewModel.getHeadlines("us","a9105f91876947b1b3b70761813fd4f9")
-           newsViewModel.getEverything("bitcoin","a9105f91876947b1b3b70761813fd4f9")
 
-           val headlinesList = newsViewModel.topHeadlinesState?.value
-           val everythingList = newsViewModel.everythingState?.value
+        setContent {
 
-           Column {
-                val navController = rememberNavController()
-                 SetUpUi(navController = navController, headlinesModel = headlinesList!! , everythingModel = everythingList!! )
-                }
-            }
-        }
-    }
+            val navController = rememberNavController()
+            Surface(color = Color.White) {
+                Scaffold(
+                        topBar = {
+                            TopAppBar(
+                                    title = { Text(text = "News Application") },
+                                    backgroundColor = Color.White,
+                                    elevation = 12.dp,
+                                    actions = {},
+                                    navigationIcon = {}
+                            )
+                        },
+                        bottomBar = {
+                            BottomAppBar {
+                                val screensList = listOf(Screens.headliensScreen, Screens.everythingScreen)
 
-@Composable
-private fun SetUpUi(navController: NavHostController,headlinesModel: TopHeadlinesModel,everythingModel: EverythingModel){
-    Scaffold {
-        // TODO  : AppBar
-        TopAppBar(
-                title = {Text(text = "News Application") },
-                backgroundColor = Color.White,
-                elevation =  12.dp,
-                actions = {},
-                navigationIcon = {}
-        )
+                                BottomNavigation(backgroundColor = Color.Black) {
+                                    val navBackStackEntry by navController.currentBackStackEntryAsState()
+                                    val currentRoute = navBackStackEntry?.arguments?.getString(KEY_ROUTE)
 
-        // TODO : BottomBar and BottomNavigationView
-        BottomAppBar {
-            val screensList = listOf(Screens.headliensScreen, Screens.everythingScreen)
-
-            BottomNavigation(backgroundColor = Color.Black) {
-                val navBackStackEntry by navController.currentBackStackEntryAsState()
-                val currentRoute = navBackStackEntry?.arguments?.getString(KEY_ROUTE)
-
-                screensList.forEach {
-                    BottomNavigationItem(
-                            icon = { Icon(it.icon) },
-                            label = {Text(text = it.label) },
-                            selected = currentRoute == it.route,
-                            onClick = {
-                                navController.popBackStack(navController.graph.startDestination, false)
-                                if(currentRoute != it.route){
-                                    navController.navigate(it.route)
+                                    screensList.forEach {
+                                        BottomNavigationItem(
+                                                icon = { Icon(it.icon) },
+                                                selected = currentRoute == it.route,
+                                                label = { Text(text = it.label) },
+                                                onClick = {
+                                                    navController.popBackStack(
+                                                            navController.graph.startDestination, false)
+                                                    if (currentRoute != it.route) {
+                                                        navController.navigate(it.route)
+                                                    }
+                                                })
+                                    }
                                 }
-                            })
+
+                            }
+                        }) {
+
+                    val headlinesList = newsViewModel.getHeadlines("us", "a9105f91876947b1b3b70761813fd4f9")?.value
+                    val everythingList = newsViewModel.getEverything("bitcoin", "a9105f91876947b1b3b70761813fd4f9")?.value
+
+                    GetHeadlines(navController = navController, headlinesList!!, everythingList!!)
                 }
             }
-
         }
-      //  GetHeadlines(navController = navController, list = headlinesModel,everythingList = everythingModel)
-
     }
 }
 
+
 @Composable
-private fun GetHeadlines(navController: NavHostController, list : TopHeadlinesModel,everythingList : EverythingModel){
+private fun GetHeadlines(navController: NavHostController, headlinesList : TopHeadlinesModel, everythingList: EverythingModel) {
     NavHost(navController = navController,
-            startDestination = "headlines"){
-        composable("headlines"){
-           HeadlinesScreen(list)
+            startDestination = "headlines") {
+        composable("headlines") {
+            HeadlinesScreen(headlinesList)
         }
-        composable("everything"){
+        composable("everything") {
             EverythingScreen(everythingList)
         }
     }
 }
 
 @Composable
-private fun HeadlinesScreen(list : TopHeadlinesModel){
-    LazyColumn{
-        items(list.articles){
-            Card(modifier = Modifier
-                    .fillMaxWidth()
-                    .height(250.dp)
-                    .clip(shape = RoundedCornerShape(14.dp))
-                    .padding(20.dp),
+private fun HeadlinesScreen(list : TopHeadlinesModel) {
+
+    LazyColumn {
+        items(list.articles) { value ->
+            Card(
+                    modifier = Modifier.fillMaxWidth()
+                            .height(250.dp)
+                            .clip(shape = RoundedCornerShape(14.dp))
+                            .padding(20.dp),
                     elevation = 14.dp,
                     backgroundColor = Color.White,
-                    content = {
-                        list.articles.forEach {
-                                val image = Extras.loadPicture(imageUrl =  it.urlToImage, defaultImg = R.drawable.ic_launcher_background).value
-                                image?.let {
-                                    Image(  modifier =  Modifier.fillMaxWidth().height(200.dp),
-                                            bitmap = it.asImageBitmap()) }
+            ) {
+                Box(modifier = Modifier.height(200.dp).padding(16.dp)) {
+                    val image = Extras.loadPicture(imageUrl = value.urlToImage, defaultImg = R.drawable.ic_launcher_background).value
+                    image?.let {
+                        Image(modifier = Modifier.fillMaxWidth().height(200.dp),
+                                bitmap = it.asImageBitmap())
+                    }
 
-                            Spacer(modifier = Modifier.padding(top = 10.dp))
+                    Spacer(modifier = Modifier.padding(top = 10.dp))
 
-                            Text(text = "${it.title}")
+                    Text(text = "${value.title}")
 
-                            Spacer(modifier = Modifier.padding(top = 10.dp))
+                    Spacer(modifier = Modifier.padding(top = 10.dp))
 
-                            Text(text = "${it.publishedAt}")
-                        }
-                    })
-
+                    Text(text = "${value.publishedAt}")
+                }
+            }
         }
     }
 }
 
 @Composable
-private fun EverythingScreen(everythingList : EverythingModel){
-    LazyColumn{
-        items(everythingList.articles){
+private fun EverythingScreen(list : EverythingModel) {
+    LazyColumn {
+        items(list.articles) { value ->
             Card(
                     modifier = Modifier
                             .fillMaxWidth()
@@ -149,23 +149,22 @@ private fun EverythingScreen(everythingList : EverythingModel){
                     elevation = 14.dp,
                     backgroundColor = Color.White,
                     content = {
-                        everythingList.articles.forEach {
-                                    val image = Extras.loadPicture(imageUrl = it.urlToImage, defaultImg = R.drawable.ic_launcher_background).value
-                                    image?.let {
-                                        Image(  modifier =  Modifier
-                                                .fillMaxWidth()
-                                                .height(200.dp),
-                                                bitmap = it.asImageBitmap())
-                                    }
-
-                            Spacer(modifier = Modifier.padding(top = 10.dp))
-
-                            Text(text = "${it.title}")
-
-                            Spacer(modifier = Modifier.padding(top = 10.dp))
-
-                            Text(text = "${it.publishedAt}")
+                        val image = Extras.loadPicture(imageUrl = value.urlToImage, defaultImg = R.drawable.ic_launcher_background).value
+                        image?.let {
+                            Image(modifier = Modifier
+                                    .fillMaxWidth()
+                                    .height(200.dp),
+                                    bitmap = it.asImageBitmap())
                         }
+
+                        Spacer(modifier = Modifier.padding(top = 10.dp))
+
+                        Text(text = "${value.title}")
+
+                        Spacer(modifier = Modifier.padding(top = 10.dp))
+
+                        Text(text = "${value.publishedAt}")
+
                     })
         }
     }

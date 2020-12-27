@@ -16,23 +16,25 @@ class NewsViewModel @ViewModelInject constructor(
 ) : ViewModel(){
 
 
-     var topHeadlinesState : MutableState<TopHeadlinesModel>? = mutableStateOf(
+     private var topHeadlinesState : MutableState<TopHeadlinesModel>? = mutableStateOf(
         TopHeadlinesModel(emptyList()))
-     var everythingState : MutableState<EverythingModel>? = mutableStateOf(
+     private var everythingState : MutableState<EverythingModel>? = mutableStateOf(
              EverythingModel(emptyList()))
 
-    fun getHeadlines(country : String , apikey : String){
+    fun getHeadlines(country : String , apikey : String) : MutableState<TopHeadlinesModel>?{
        viewModelScope.launch {
            try {
                repository.getTopHeadlines(country,apikey).collect {
                    topHeadlinesState?.value  = it
+                   Log.d("VALUE","value ${it.articles[0].title}")
                }
            }catch (ex : Exception){
                Log.d("TAG","Error ${ex.message}")
            }
        }
+        return topHeadlinesState
     }
-    fun getEverything(query : String , apikey: String){
+    fun getEverything(query : String , apikey: String) : MutableState<EverythingModel>?{
         viewModelScope.launch {
             try {
                 repository.getEverything(query,apikey).collect {
@@ -42,5 +44,6 @@ class NewsViewModel @ViewModelInject constructor(
                 Log.d("TAG","Error ${ex.message}")
             }
         }
+        return everythingState
     }
 }
