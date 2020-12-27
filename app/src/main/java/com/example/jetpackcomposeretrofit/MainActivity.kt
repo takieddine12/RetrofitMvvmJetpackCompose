@@ -36,6 +36,7 @@ import javax.inject.Inject
 class MainActivity : AppCompatActivity() {
 
     private val newsViewModel: NewsViewModel by viewModels()
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 

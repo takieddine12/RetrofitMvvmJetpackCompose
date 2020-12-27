@@ -25,8 +25,7 @@ class NewsViewModel @ViewModelInject constructor(
        viewModelScope.launch {
            try {
                repository.getTopHeadlines(country,apikey).collect {
-                   topHeadlinesState?.value  = it
-                   Log.d("VALUE","value ${it.articles[0].title}")
+                   topHeadlinesState!!.value  = it
                }
            }catch (ex : Exception){
                Log.d("TAG","Error ${ex.message}")
@@ -38,7 +37,7 @@ class NewsViewModel @ViewModelInject constructor(
         viewModelScope.launch {
             try {
                 repository.getEverything(query,apikey).collect {
-                    everythingState?.value = it
+                    everythingState?.value  = it
                 }
             }catch (ex : Exception){
                 Log.d("TAG","Error ${ex.message}")
