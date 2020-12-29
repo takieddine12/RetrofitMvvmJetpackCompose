@@ -102,6 +102,9 @@ android {
         implementation 'org.jetbrains.kotlinx:kotlinx-coroutines-android:1.4.1'
 
 
+        //Timber
+        implementation 'com.jakewharton.timber:timber:4.7.1'
+
         //--HttpLoggingInterceptor
         implementation"com.squareup.okhttp3:logging-interceptor:4.6.0"
 

@@ -1,5 +1,7 @@
 package com.example.jetpackcomposeretrofit.mvvm
 
+import androidx.lifecycle.LiveData
+import androidx.lifecycle.MutableLiveData
 import com.example.jetpackcomposeretrofit.auth.AuthService
 import com.example.jetpackcomposeretrofit.models.everythingmodel.EverythingModel
 import com.example.jetpackcomposeretrofit.models.headlinesmodel.TopHeadlinesModel
@@ -11,14 +13,11 @@ class NewsRepository @Inject constructor(
     var authService: AuthService
 ) {
 
-    // TODO : Using Flow Api To get data
-
-    fun getTopHeadlines(country : String , apiKey : String) : Flow<TopHeadlinesModel> {
+    fun getTopHeadlines(country : String , apiKey: String)  : Flow<TopHeadlinesModel> {
         return flow {
-            emit(authService.getHeadlines(country,apiKey))
+            emit(authService.getHeadlines(country = country,apiKey = apiKey))
         }
     }
-
     fun getEverything(query : String , apiKey : String) : Flow<EverythingModel>{
         return flow {
             emit(authService.getEverything(query,apiKey))
